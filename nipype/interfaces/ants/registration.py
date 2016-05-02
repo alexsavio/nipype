@@ -121,7 +121,7 @@ class ANTS(ANTSCommand):
     >>> ants.inputs.regularization_deformation_field_sigma = 0
     >>> ants.inputs.number_of_affine_iterations = [10000,10000,10000,10000,10000]
     >>> ants.cmdline
-    'ANTS 3 --MI-option 32x16000 --image-metric CC[ T1.nii, resting.nii, 1, 5 ] --number-of-affine-iterations \
+    'ANTS 3 --MI-option 32x16000 --image-metric CC[ "T1.nii", "resting.nii", 1, 5 ] --number-of-affine-iterations \
 10000x10000x10000x10000x10000 --number-of-iterations 50x35x15 --output-naming MY --regularization Gauss[3.0,0.0] \
 --transformation-model SyN[0.25] --use-Histogram-Matching 1'
     """
@@ -136,14 +136,11 @@ class ANTS(ANTSCommand):
         for ii in range(len(self.inputs.moving_image)):
             if self.inputs.metric[ii] in intensity_based:
                 retval.append(
-                    '--image-metric %s[ %s, %s, %g, %d ]' % (self.inputs.metric[ii],
-                                                             self.inputs.fixed_image[
-                                                                 ii],
-                                                             self.inputs.moving_image[
-                                                                 ii],
-                                                             self.inputs.metric_weight[
-                                                                 ii],
-                                                             self.inputs.radius[ii]))
+                    '--image-metric %s[ "%s", "%s", %g, %d ]' % (self.inputs.metric[ii],
+                                                                 self.inputs.fixed_image[ii],
+                                                                 self.inputs.moving_image[ii],
+                                                                 self.inputs.metric_weight[ii],
+                                                                 self.inputs.radius[ii]))
             elif self.inputs.metric[ii] == point_set_based:
                 pass
                 # retval.append('--image-metric %s[%s, %s, ...'.format(self.inputs.metric[ii],
@@ -220,19 +217,19 @@ class RegistrationInputSpec(ANTSCommandInputSpec):
                             usedefault=True, desc='image dimension (2 or 3)')
     fixed_image = InputMultiPath(File(exists=True), mandatory=True,
                                  desc='image to apply transformation to (generally a coregistered functional)')
-    fixed_image_mask = File(argstr='%s', exists=True,
+    fixed_image_mask = File(argstr='"%s"', exists=True,
                             desc='mask used to limit metric sampling region of the fixed image')
     moving_image = InputMultiPath(File(exists=True), mandatory=True,
                                   desc='image to apply transformation to (generally a coregistered functional)')
     moving_image_mask = File(requires=['fixed_image_mask'],
                              exists=True, desc='mask used to limit metric sampling region of the moving image')
 
-    save_state = File(argstr='--save-state %s', exists=False,
+    save_state = File(argstr='--save-state "%s"', exists=False,
                       desc='Filename for saving the internal restorable state of the registration')
-    restore_state = File(argstr='--restore-state %s', exists=True,
+    restore_state = File(argstr='--restore-state "%s"', exists=True,
                          desc='Filename for restoring the internal restorable state of the registration')
 
-    initial_moving_transform = File(argstr='%s', exists=True, desc='',
+    initial_moving_transform = File(argstr='"%s"', exists=True, desc='',
                                     xor=['initial_moving_transform_com'])
     invert_initial_moving_transform = traits.Bool(requires=["initial_moving_transform"],
         desc='', xor=['initial_moving_transform_com'])
@@ -433,12 +430,12 @@ class Registration(ANTSCommand):
     >>> reg1 = copy.deepcopy(reg)
     >>> reg1.inputs.winsorize_lower_quantile = 0.025
     >>> reg1.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
---transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, "output_warped_image.nii.gz" ] \
+--transform Affine[ 2.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 1.0 ]  --write-composite-transform 1'
     >>> reg1.run()  # doctest: +SKIP
@@ -446,12 +443,12 @@ class Registration(ANTSCommand):
     >>> reg2 = copy.deepcopy(reg)
     >>> reg2.inputs.winsorize_upper_quantile = 0.975
     >>> reg2.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
---transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, "output_warped_image.nii.gz" ] \
+--transform Affine[ 2.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 0.975 ]  --write-composite-transform 1'
 
@@ -459,12 +456,12 @@ class Registration(ANTSCommand):
     >>> reg3.inputs.winsorize_lower_quantile = 0.025
     >>> reg3.inputs.winsorize_upper_quantile = 0.975
     >>> reg3.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
---transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, "output_warped_image.nii.gz" ] \
+--transform Affine[ 2.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.025, 0.975 ]  --write-composite-transform 1'
 
@@ -472,11 +469,11 @@ class Registration(ANTSCommand):
     >>> reg3a.inputs.float = True
     >>> reg3a.cmdline
     'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 1 \
---initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear \
---output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
+--initial-moving-transform [ "trans.mat", 1 ] --initialize-transforms-per-stage 0 --interpolation Linear \
+--output [ output_, "output_warped_image.nii.gz" ] --transform Affine[ 2.0 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
---transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
+--transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
@@ -485,11 +482,11 @@ class Registration(ANTSCommand):
     >>> reg3b.inputs.float = False
     >>> reg3b.cmdline
     'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --float 0 \
---initial-moving-transform [ trans.mat, 1 ] --initialize-transforms-per-stage 0 --interpolation Linear \
---output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
+--initial-moving-transform [ "trans.mat", 1 ] --initialize-transforms-per-stage 0 --interpolation Linear \
+--output [ output_, "output_warped_image.nii.gz" ] --transform Affine[ 2.0 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
---transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
+--transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
@@ -512,12 +509,12 @@ class Registration(ANTSCommand):
      'save_state': '.../nipype/testing/data/trans.mat',
      'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
     >>> reg4.cmdline
-    'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
---restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
+    'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, "output_warped_image.nii.gz" ] \
+--restore-state "trans.mat" --save-state trans.mat --transform Affine[ 2.0 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
---transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
+--transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
@@ -540,12 +537,12 @@ class Registration(ANTSCommand):
      'warped_image': '.../nipype/testing/data/output_warped_image.nii.gz'}
     >>> reg4b.aggregate_outputs()  # doctest: +SKIP
     >>> reg4b.cmdline
-    'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
---restore-state trans.mat --save-state trans.mat --transform Affine[ 2.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
+    'antsRegistration --collapse-output-transforms 1 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 1 --interpolation Linear --output [ output_, "output_warped_image.nii.gz" ] \
+--restore-state trans.mat --save-state "trans.mat" --transform Affine[ 2.0 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
---transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
+--transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 0'
@@ -560,13 +557,13 @@ class Registration(ANTSCommand):
     >>> reg5.inputs.sampling_strategy = ['Random', None] # use default strategy in second stage
     >>> reg5.inputs.sampling_percentage = [0.05, [0.05, 0.10]]
     >>> reg5.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
---transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, "output_warped_image.nii.gz" ] \
+--transform Affine[ 2.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] \
---metric CC[ fixed1.nii, moving1.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 0.5, 32, None, 0.05 ] \
+--metric CC[ "fixed1.nii", "moving1.nii", 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
@@ -575,13 +572,13 @@ class Registration(ANTSCommand):
     >>> reg6.inputs.fixed_image = ['fixed1.nii', 'fixed2.nii']
     >>> reg6.inputs.moving_image = ['moving1.nii', 'moving2.nii']
     >>> reg6.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
---transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, "output_warped_image.nii.gz" ] \
+--transform Affine[ 2.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 0.5, 32, None, 0.05 ] \
---metric CC[ fixed2.nii, moving2.nii, 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 0.5, 32, None, 0.05 ] \
+--metric CC[ "fixed2.nii", "moving2.nii", 0.5, 4, None, 0.1 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
@@ -590,12 +587,12 @@ class Registration(ANTSCommand):
     >>> reg7a.inputs.interpolation = 'BSpline'
     >>> reg7a.inputs.interpolation_parameters = (3,)
     >>> reg7a.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 0 --interpolation BSpline[ 3 ] --output [ output_, output_warped_image.nii.gz ] \
---transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 0 --interpolation BSpline[ 3 ] --output [ output_, "output_warped_image.nii.gz" ] \
+--transform Affine[ 2.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform SyN[ 0.25, 3.0, 0.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
 
@@ -604,12 +601,12 @@ class Registration(ANTSCommand):
     >>> reg7b.inputs.interpolation = 'Gaussian'
     >>> reg7b.inputs.interpolation_parameters = (1.0, 1.0)
     >>> reg7b.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
 --initialize-transforms-per-stage 0 --interpolation Gaussian[ 1.0, 1.0 ] \
---output [ output_, output_warped_image.nii.gz ] --transform Affine[ 2.0 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
+--output [ output_, "output_warped_image.nii.gz" ] --transform Affine[ 2.0 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] --convergence [ 1500x200, 1e-08, 20 ] \
 --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 \
---transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] \
+--transform SyN[ 0.25, 3.0, 0.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] \
 --convergence [ 100x50x30, 1e-09, 20 ] --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  \
 --write-composite-transform 1'
@@ -619,12 +616,12 @@ class Registration(ANTSCommand):
     >>> reg8.inputs.transforms = ['Affine', 'BSplineSyN']
     >>> reg8.inputs.transform_parameters = [(2.0,), (0.25, 26, 0, 3)]
     >>> reg8.cmdline
-    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ trans.mat, 1 ] \
---initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, output_warped_image.nii.gz ] \
---transform Affine[ 2.0 ] --metric Mattes[ fixed1.nii, moving1.nii, 1, 32, Random, 0.05 ] \
+    'antsRegistration --collapse-output-transforms 0 --dimensionality 3 --initial-moving-transform [ "trans.mat", 1 ] \
+--initialize-transforms-per-stage 0 --interpolation Linear --output [ output_, "output_warped_image.nii.gz" ] \
+--transform Affine[ 2.0 ] --metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32, Random, 0.05 ] \
 --convergence [ 1500x200, 1e-08, 20 ] --smoothing-sigmas 1.0x0.0vox --shrink-factors 2x1 \
 --use-estimate-learning-rate-once 1 --use-histogram-matching 1 --transform BSplineSyN[ 0.25, 26, 0, 3 ] \
---metric Mattes[ fixed1.nii, moving1.nii, 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
+--metric Mattes[ "fixed1.nii", "moving1.nii", 1, 32 ] --convergence [ 100x50x30, 1e-09, 20 ] \
 --smoothing-sigmas 2.0x1.0x0.0vox --shrink-factors 3x2x1 --use-estimate-learning-rate-once 1 \
 --use-histogram-matching 1 --winsorize-image-intensities [ 0.0, 1.0 ]  --write-composite-transform 1'
     """
@@ -698,11 +695,11 @@ class Registration(ANTSCommand):
 
     @staticmethod
     def _format_metric_argument(**kwargs):
-        retval = '%s[ %s, %s, %g, %d' % (kwargs['metric'],
-                                         kwargs['fixed_image'],
-                                         kwargs['moving_image'],
-                                         kwargs['weight'],
-                                         kwargs['radius_or_bins'])
+        retval = '%s[ "%s", "%s", %g, %d' % (kwargs['metric'],
+                                             kwargs['fixed_image'],
+                                             kwargs['moving_image'],
+                                             kwargs['weight'],
+                                             kwargs['radius_or_bins'])
 
         # The optional sampling strategy.
         if 'sampling_strategy' in kwargs:
@@ -805,10 +802,10 @@ class Registration(ANTSCommand):
     def _format_arg(self, opt, spec, val):
         if opt == 'fixed_image_mask':
             if isdefined(self.inputs.moving_image_mask):
-                return '--masks [ %s, %s ]' % (self.inputs.fixed_image_mask,
-                                               self.inputs.moving_image_mask)
+                return '--masks [ "%s", "%s" ]' % (self.inputs.fixed_image_mask,
+                                                   self.inputs.moving_image_mask)
             else:
-                return '--masks %s' % self.inputs.fixed_image_mask
+                return '--masks "%s"' % self.inputs.fixed_image_mask
         elif opt == 'transforms':
             return self._format_registration()
         elif opt == 'initial_moving_transform':
@@ -816,16 +813,16 @@ class Registration(ANTSCommand):
                 do_invert_transform = int(self.inputs.invert_initial_moving_transform)
             except ValueError:
                 do_invert_transform = 0  # Just do the default behavior
-            return '--initial-moving-transform [ %s, %d ]' % (self.inputs.initial_moving_transform,
-                                                              do_invert_transform)
+            return '--initial-moving-transform [ "%s", %d ]' % (self.inputs.initial_moving_transform,
+                                                                do_invert_transform)
         elif opt == 'initial_moving_transform_com':
             try:
                 do_center_of_mass_init = int(self.inputs.initial_moving_transform_com)
             except ValueError:
                 do_center_of_mass_init = 0  # Just do the default behavior
-            return '--initial-moving-transform [ %s, %s, %d ]' % (self.inputs.fixed_image[0],
-                                                                  self.inputs.moving_image[0],
-                                                                  do_center_of_mass_init)
+            return '--initial-moving-transform [ "%s", "%s", %d ]' % (self.inputs.fixed_image[0],
+                                                                      self.inputs.moving_image[0],
+                                                                      do_center_of_mass_init)
         elif opt == 'interpolation':
             if self.inputs.interpolation in ['BSpline', 'MultiLabel', 'Gaussian'] and \
                     isdefined(self.inputs.interpolation_parameters):
@@ -838,12 +835,12 @@ class Registration(ANTSCommand):
             out_filename = self._get_outputfilenames(inverse=False)
             inv_out_filename = self._get_outputfilenames(inverse=True)
             if out_filename and inv_out_filename:
-                return '--output [ %s, %s, %s ]' % (self.inputs.output_transform_prefix,
-                                                    out_filename,
-                                                    inv_out_filename)
+                return '--output [ %s, "%s", "%s" ]' % (self.inputs.output_transform_prefix,
+                                                        out_filename,
+                                                        inv_out_filename)
             elif out_filename:
-                return '--output [ %s, %s ]' % (self.inputs.output_transform_prefix,
-                                                out_filename)
+                return '--output [ %s, "%s" ]' % (self.inputs.output_transform_prefix,
+                                                  out_filename)
             else:
                 return '--output %s' % self.inputs.output_transform_prefix
         elif opt == 'winsorize_upper_quantile' or opt == 'winsorize_lower_quantile':

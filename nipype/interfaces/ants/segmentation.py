@@ -22,19 +22,19 @@ class AtroposInputSpec(ANTSCommandInputSpec):
                             usedefault=True,
                             desc='image dimension (2, 3, or 4)')
     intensity_images = InputMultiPath(File(exists=True),
-                                      argstr="--intensity-image %s...",
+                                      argstr='--intensity-image "%s"...',
                                       mandatory=True)
-    mask_image = File(exists=True, argstr='--mask-image %s', mandatory=True)
+    mask_image = File(exists=True, argstr='--mask-image "%s"', mandatory=True)
     initialization = traits.Enum('Random', 'Otsu', 'KMeans',
                                  'PriorProbabilityImages', 'PriorLabelImage',
-                                 argstr="%s",
+                                 argstr='%s',
                                  requires=['number_of_tissue_classes'],
                                  mandatory=True)
     prior_probability_images = InputMultiPath(File(exists=True))
     number_of_tissue_classes = traits.Int(mandatory=True)
     prior_weighting = traits.Float()
     prior_probability_threshold = traits.Float(requires=['prior_weighting'])
-    likelihood_model = traits.Str(argstr="--likelihood-model %s")
+    likelihood_model = traits.Str(argstr='--likelihood-model "%s"')
     mrf_smoothing_factor = traits.Float(argstr="%s")
     mrf_radius = traits.List(traits.Int(), requires=['mrf_smoothing_factor'])
     icm_use_synchronous_update = traits.Bool(argstr="%s")
@@ -91,8 +91,8 @@ class Atropos(ANTSCommand):
     >>> at.inputs.save_posteriors = True
     >>> at.cmdline
     'Atropos --image-dimensionality 3 --icm [1,1] \
---initialization PriorProbabilityImages[2,priors/priorProbImages%02d.nii,0.8,1e-07] --intensity-image structural.nii \
---likelihood-model Gaussian --mask-image mask.nii --mrf [0.2,1x1x1] --convergence [5,1e-06] \
+--initialization PriorProbabilityImages[2,priors/priorProbImages%02d.nii,0.8,1e-07] --intensity-image "structural.nii" \
+--likelihood-model Gaussian --mask-image "mask.nii" --mrf [0.2,1x1x1] --convergence [5,1e-06] \
 --output [structural_labeled.nii,POSTERIOR_%02d.nii.gz] --posterior-formulation Socrates[1] --use-random-seed 1'
     """
     input_spec = AtroposInputSpec
@@ -174,13 +174,13 @@ class Atropos(ANTSCommand):
 
 
 class LaplacianThicknessInputSpec(ANTSCommandInputSpec):
-    input_wm = File(argstr='%s', mandatory=True, copyfile=True,
+    input_wm = File(argstr='"%s"', mandatory=True, copyfile=True,
                     desc='white matter segmentation image',
                     position=1)
-    input_gm = File(argstr='%s', mandatory=True, copyfile=True,
+    input_gm = File(argstr='"%s"', mandatory=True, copyfile=True,
                     desc='gray matter segmentation image',
                     position=2)
-    output_image = File(desc='name of output file', argstr='%s', position=3,
+    output_image = File(desc='name of output file', argstr='"%s"', position=3,
                         genfile=True, hash_files=False)
     smooth_param = traits.Float(argstr='smoothparam=%d', desc='', position=4)
     prior_thickness = traits.Float(argstr='priorthickval=%d', desc='',
@@ -238,11 +238,11 @@ class N4BiasFieldCorrectionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d',
                             usedefault=True,
                             desc='image dimension (2 or 3)')
-    input_image = File(argstr='--input-image %s', mandatory=True,
+    input_image = File(argstr='--input-image "%s"', mandatory=True,
                        desc=('image to apply transformation to (generally a '
                              'coregistered functional)'))
-    mask_image = File(argstr='--mask-image %s')
-    weight_image = File(argstr='--weight-image %s')
+    mask_image = File(argstr='--mask-image "%s"')
+    weight_image = File(argstr='--weight-image "%s"')
     output_image = traits.Str(argstr='--output %s',
                               desc='output file name', genfile=True,
                               hash_files=False)
@@ -290,24 +290,24 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4.inputs.n_iterations = [50,50,30,20]
     >>> n4.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
--d 3 --input-image structural.nii \
---convergence [ 50x50x30x20 ] --output structural_corrected.nii \
+-d 3 --input-image "structural.nii" \
+--convergence [ 50x50x30x20 ] --output "structural_corrected.nii" \
 --shrink-factor 3'
 
     >>> n4_2 = copy.deepcopy(n4)
     >>> n4_2.inputs.convergence_threshold = 1e-6
     >>> n4_2.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300 ] \
--d 3 --input-image structural.nii \
---convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
+-d 3 --input-image "structural.nii" \
+--convergence [ 50x50x30x20, 1e-06 ] --output "structural_corrected.nii" \
 --shrink-factor 3'
 
     >>> n4_3 = copy.deepcopy(n4_2)
     >>> n4_3.inputs.bspline_order = 5
     >>> n4_3.cmdline
     'N4BiasFieldCorrection --bspline-fitting [ 300, 5 ] \
--d 3 --input-image structural.nii \
---convergence [ 50x50x30x20, 1e-06 ] --output structural_corrected.nii \
+-d 3 --input-image "structural.nii" \
+--convergence [ 50x50x30x20, 1e-06 ] --output "structural_corrected.nii" \
 --shrink-factor 3'
 
     >>> n4_4 = N4BiasFieldCorrection()
@@ -315,8 +315,8 @@ class N4BiasFieldCorrection(ANTSCommand):
     >>> n4_4.inputs.save_bias = True
     >>> n4_4.inputs.dimension = 3
     >>> n4_4.cmdline
-    'N4BiasFieldCorrection -d 3 --input-image structural.nii \
---output [ structural_corrected.nii, structural_bias.nii ]'
+    'N4BiasFieldCorrection -d 3 --input-image "structural.nii" \
+--output [ "structural_corrected.nii", "structural_bias.nii" ]'
     """
 
     _cmd = 'N4BiasFieldCorrection'
@@ -344,7 +344,7 @@ class N4BiasFieldCorrection(ANTSCommand):
                 (self.inputs.save_bias or isdefined(self.inputs.bias_image))):
             bias_image = self._gen_filename('bias_image')
             output = self._gen_filename('output_image')
-            newval = '[ %s, %s ]' % (output, bias_image)
+            newval = '[ "%s", "%s" ]' % (output, bias_image)
             return trait_spec.argstr % newval
 
         if name == 'bspline_fitting_distance':
@@ -385,7 +385,7 @@ class N4BiasFieldCorrection(ANTSCommand):
 class CorticalThicknessInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
                             desc='image dimension (2 or 3)')
-    anatomical_image = File(exists=True, argstr='-a %s',
+    anatomical_image = File(exists=True, argstr='-a "%s"',
                             desc=('Structural *intensity* image, typically T1.'
                                   'If more than one anatomical image is specified,'
                                   'subsequently specified images are used during the'
@@ -394,16 +394,16 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
                                   'Our suggestion would be to specify the T1'
                                   'as the first image.'),
                             mandatory=True)
-    brain_template = File(exists=True, argstr='-e %s',
+    brain_template = File(exists=True, argstr='-e "%s"',
                           desc=('Anatomical *intensity* template (possibly created using a'
                                 'population data set with buildtemplateparallel.sh in ANTs).'
                                 'This template is  *not* skull-stripped.'),
                           mandatory=True)
-    brain_probability_mask = File(exists=True, argstr='-m %s',
+    brain_probability_mask = File(exists=True, argstr='-m "%s"',
                                   desc='brain probability mask in template space', copyfile=False, mandatory=True)
     segmentation_priors = InputMultiPath(
-        File(exists=True), argstr='-p %s', mandatory=True)
-    out_prefix = traits.Str('antsCT_', argstr='-o %s', usedefault=True,
+        File(exists=True), argstr='-p "%s"', mandatory=True)
+    out_prefix = traits.Str('antsCT_', argstr='-o "%s"', usedefault=True,
                             desc=('Prefix that is prepended to all output'
                                   ' files (default = antsCT_)'))
     image_suffix = traits.Str('nii.gz', desc=('any of standard ITK formats,'
@@ -415,8 +415,8 @@ class CorticalThicknessInputSpec(ANTSCommandInputSpec):
                                           'case would be where this would be the same'
                                           'template as specified in the -e option which'
                                           'is not skull stripped.'),
-                                    argstr='-t %s', mandatory=True)
-    extraction_registration_mask = File(exists=True, argstr='-f %s',
+                                    argstr='-t "%s"', mandatory=True)
+    extraction_registration_mask = File(exists=True, argstr='-f "%s"',
                                         desc=('Mask (defined in the template space) used during'
                                               ' registration for brain extraction.'))
     keep_temporary_files = traits.Int(argstr='-k %d',
@@ -512,19 +512,19 @@ class CorticalThickness(ANTSCommand):
 
     def _format_arg(self, opt, spec, val):
         if opt == 'anatomical_image':
-            retval = '-a %s' % val
+            retval = '-a "%s"' % val
             return retval
         if opt == 'brain_template':
-            retval = '-e %s' % val
+            retval = '-e "%s"' % val
             return retval
         if opt == 'brain_probability_mask':
-            retval = '-m %s' % val
+            retval = '-m "%s"' % val
             return retval
         if opt == 'out_prefix':
-            retval = '-o %s' % val
+            retval = '-o "%s"' % val
             return retval
         if opt == 't1_registration_template':
-            retval = '-t %s' % val
+            retval = '-t "%s"' % val
             return retval
         if opt == 'segmentation_priors':
             _, _, ext = split_filename(self.inputs.segmentation_priors[0])
@@ -605,7 +605,7 @@ class antsCorticalThickness(CorticalThickness):
 class BrainExtractionInputSpec(ANTSCommandInputSpec):
     dimension = traits.Enum(3, 2, argstr='-d %d', usedefault=True,
                             desc='image dimension (2 or 3)')
-    anatomical_image = File(exists=True, argstr='-a %s',
+    anatomical_image = File(exists=True, argstr='-a "%s"',
                             desc=('Structural image, typically T1.  If more than one'
                                   'anatomical image is specified, subsequently specified'
                                   'images are used during the segmentation process.  However,'
@@ -614,11 +614,11 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
                                   'Anatomical template created using e.g. LPBA40 data set with'
                                   'buildtemplateparallel.sh in ANTs.'),
                             mandatory=True)
-    brain_template = File(exists=True, argstr='-e %s',
+    brain_template = File(exists=True, argstr='-e "%s"',
                           desc=('Anatomical template created using e.g. LPBA40 data set with'
                                 'buildtemplateparallel.sh in ANTs.'),
                           mandatory=True)
-    brain_probability_mask = File(exists=True, argstr='-m %s',
+    brain_probability_mask = File(exists=True, argstr='-m "%s"',
                                   desc=('Brain probability mask created using e.g. LPBA40 data set which'
                                         'have brain masks defined, and warped to anatomical template and'
                                         'averaged resulting in a probability image.'),
@@ -627,7 +627,7 @@ class BrainExtractionInputSpec(ANTSCommandInputSpec):
                             desc=('Prefix that is prepended to all output'
                                   ' files (default = highress001_)'))
 
-    extraction_registration_mask = File(exists=True, argstr='-f %s',
+    extraction_registration_mask = File(exists=True, argstr='-f "%s"',
                                         desc=('Mask (defined in the template space) used during'
                                               ' registration for brain extraction.'
                                               'To limit the metric computation to a specific region.'))
@@ -695,11 +695,11 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
     modalities = traits.Int(argstr='%d', position=1, mandatory=True,
                             desc='Number of modalities or features')
     warped_intensity_images = InputMultiPath(File(exists=True),
-                                             argstr="-g %s...", mandatory=True,
+                                             argstr='-g "%s"...', mandatory=True,
                                              desc='Warped atlas images')
-    target_image = InputMultiPath(File(exists=True), argstr='-tg %s...',
+    target_image = InputMultiPath(File(exists=True), argstr='-tg "%s"...',
                                   mandatory=True, desc='Target image(s)')
-    warped_label_images = InputMultiPath(File(exists=True), argstr="-l %s...",
+    warped_label_images = InputMultiPath(File(exists=True), argstr='-l "%s"...',
                                          mandatory=True,
                                          desc='Warped atlas segmentations')
     method = traits.Str(default='Joint', argstr='-m %s', usedefault=True,
@@ -712,7 +712,7 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
     beta = traits.Int(default=2, usedefault=True, requires=['method'],
                       desc=('Exponent for mapping intensity difference to joint'
                             ' error'))
-    output_label_image = File(argstr='%s', mandatory=True, position=-1,
+    output_label_image = File(argstr='"%s"', mandatory=True, position=-1,
                               name_template='%s',
                               output_name='output_label_image',
                               desc='Output fusion label map image')
@@ -721,7 +721,7 @@ class JointFusionInputSpec(ANTSCommandInputSpec):
                                         'scalar or vector. Default: 2x2x2'))
     search_radius = traits.ListInt(minlen=3, maxlen=3, argstr='-rs %s',
                                    desc='Local search radius. Default: 3x3x3')
-    exclusion_region = File(exists=True, argstr='-x %s',
+    exclusion_region = File(exists=True, argstr='-x "%s"',
                             desc=('Specify an exclusion region for the given '
                                   'label.'))
     atlas_group_id = traits.ListInt(argstr='-gp %d...',
@@ -755,8 +755,8 @@ class JointFusion(ANTSCommand):
     ...                                  'segmentation1.nii.gz']
     >>> at.inputs.target_image = 'T1.nii'
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.1,2] -tg T1.nii -g im1.nii -g im2.nii -g im3.nii -l segmentation0.nii.gz \
--l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+    'jointfusion 3 1 -m Joint[0.1,2] -tg "T1.nii" -g "im1.nii" -g "im2.nii" -g "im3.nii" -l "segmentation0.nii.gz" \
+-l "segmentation1.nii.gz" -l "segmentation1.nii.gz" "fusion_labelimage_output.nii"'
 
     >>> at.inputs.method = 'Joint'
     >>> at.inputs.alpha = 0.5
@@ -764,8 +764,8 @@ class JointFusion(ANTSCommand):
     >>> at.inputs.patch_radius = [3,2,1]
     >>> at.inputs.search_radius = [1,2,3]
     >>> at.cmdline
-    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg T1.nii -g im1.nii -g im2.nii -g im3.nii \
--l segmentation0.nii.gz -l segmentation1.nii.gz -l segmentation1.nii.gz fusion_labelimage_output.nii'
+    'jointfusion 3 1 -m Joint[0.5,1] -rp 3x2x1 -rs 1x2x3 -tg "T1.nii" -g "im1.nii" -g "im2.nii" -g "im3.nii" \
+-l "segmentation0.nii.gz" -l "segmentation1.nii.gz" -l "segmentation1.nii.gz" "fusion_labelimage_output.nii"'
     """
     input_spec = JointFusionInputSpec
     output_spec = JointFusionOutputSpec
@@ -803,7 +803,7 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
                                  'as a specified-dimensional image. If not '
                                  'specified, the program tries to infer the '
                                  'dimensionality from the input image.')
-    input_image = File(exists=True, argstr="-i %s", mandatory=True,
+    input_image = File(exists=True, argstr='-i "%s"', mandatory=True,
                        desc='A scalar image is expected as input for noise correction.')
     noise_model = traits.Enum('Gaussian', 'Rician', argstr='-n %s', usedefault=True,
                               desc=('Employ a Rician or Gaussian noise model.'))
@@ -813,7 +813,7 @@ class DenoiseImageInputSpec(ANTSCommandInputSpec):
                                      'the input image can be resampled. The shrink '
                                      'factor, specified as a single integer, describes '
                                      'this resampling. Shrink factor = 1 is the default.'))
-    output_image = File(argstr="-o %s", name_source=['input_image'], hash_files=False,
+    output_image = File(argstr='-o "%s"', name_source=['input_image'], hash_files=False,
                         keep_extension=True, name_template='%s_noise_corrected',
                         desc='The output consists of the noise corrected '
                              'version of the input image.')
@@ -841,20 +841,20 @@ class DenoiseImage(ANTSCommand):
     >>> denoise.inputs.dimension = 3
     >>> denoise.inputs.input_image = 'im1.nii'
     >>> denoise.cmdline
-    'DenoiseImage -d 3 -i im1.nii -n Gaussian -o im1_noise_corrected.nii -s 1'
+    'DenoiseImage -d 3 -i "im1.nii" -n Gaussian -o "im1_noise_corrected.nii" -s 1'
 
     >>> denoise_2 = copy.deepcopy(denoise)
     >>> denoise_2.inputs.output_image = 'output_corrected_image.nii.gz'
     >>> denoise_2.inputs.noise_model = 'Rician'
     >>> denoise_2.inputs.shrink_factor = 2
     >>> denoise_2.cmdline
-    'DenoiseImage -d 3 -i im1.nii -n Rician -o output_corrected_image.nii.gz -s 2'
+    'DenoiseImage -d 3 -i "im1.nii" -n Rician -o "output_corrected_image.nii.gz" -s 2'
 
     >>> denoise_3 = DenoiseImage()
     >>> denoise_3.inputs.input_image = 'im1.nii'
     >>> denoise_3.inputs.save_noise = True
     >>> denoise_3.cmdline
-    'DenoiseImage -i im1.nii -n Gaussian -o [ im1_noise_corrected.nii, im1_noise.nii ] -s 1'
+    'DenoiseImage -i "im1.nii" -n Gaussian -o [ "im1_noise_corrected.nii", "im1_noise.nii" ] -s 1'
     """
     input_spec = DenoiseImageInputSpec
     output_spec = DenoiseImageOutputSpec
@@ -863,7 +863,7 @@ class DenoiseImage(ANTSCommand):
     def _format_arg(self, name, trait_spec, value):
         if ((name == 'output_image') and
                 (self.inputs.save_noise or isdefined(self.inputs.noise_image))):
-            newval = '[ %s, %s ]' % (self._filename_from_source('output_image'),
+            newval = '[ "%s", "%s" ]' % (self._filename_from_source('output_image'),
                                      self._filename_from_source('noise_image'))
             return trait_spec.argstr % newval
 
@@ -877,15 +877,15 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
                                  'as a specified-dimensional image. If not '
                                  'specified, the program tries to infer the '
                                  'dimensionality from the input image.')
-    target_image = traits.List(InputMultiPath(File(exists=True)), argstr='-t %s',
+    target_image = traits.List(InputMultiPath(File(exists=True)), argstr='-t "%s"',
                                   mandatory=True, desc='The target image (or '
                                   'multimodal target images) assumed to be '
                                   'aligned to a common image domain.')
-    atlas_image = traits.List(InputMultiPath(File(exists=True)), argstr="-g %s...",
+    atlas_image = traits.List(InputMultiPath(File(exists=True)), argstr='-g "%s"...',
                                  mandatory=True, desc='The atlas image (or '
                                  'multimodal atlas images) assumed to be '
                                  'aligned to a common image domain.')
-    atlas_segmentation_image = InputMultiPath(File(exists=True), argstr="-l %s...",
+    atlas_segmentation_image = InputMultiPath(File(exists=True), argstr='-l "%s"...',
                                   mandatory=True, desc='The atlas segmentation '
                                   'images. For performing label fusion the number '
                                   'of specified segmentations should be identical '
@@ -918,9 +918,9 @@ class AntsJointFusionInputSpec(ANTSCommandInputSpec):
                                        desc=('Specify a label for the exclusion region.'))
     exclusion_image = traits.List(File(exists=True),
                                   desc=('Specify an exclusion region for the given label.'))
-    mask_image = File(argstr='-x %s', exists=True, desc='If a mask image '
+    mask_image = File(argstr='-x "%s"', exists=True, desc='If a mask image '
                       'is specified, fusion is only performed in the mask region.')
-    out_label_fusion = File(argstr="%s", hash_files=False,
+    out_label_fusion = File(argstr='"%s"', hash_files=False,
                             desc='The output label fusion image.')
     out_intensity_fusion_name_format = traits.Str('antsJointFusionIntensity_%d.nii.gz',
                                                   argstr="", desc='Optional intensity fusion '
@@ -958,13 +958,13 @@ class AntsJointFusion(ANTSCommand):
     >>> antsjointfusion.inputs.atlas_segmentation_image = ['segmentation0.nii.gz']
     >>> antsjointfusion.inputs.target_image = ['im1.nii']
     >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz \
--b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii']"
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l "segmentation0.nii.gz" \
+-b 2.0 -o "ants_fusion_label_output.nii" -s 3x3x3 -t ['im1.nii']"
 
     >>> antsjointfusion.inputs.target_image = [ ['im1.nii', 'im2.nii'] ]
     >>> antsjointfusion.cmdline
-    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l segmentation0.nii.gz \
--b 2.0 -o ants_fusion_label_output.nii -s 3x3x3 -t ['im1.nii', 'im2.nii']"
+    "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -l "segmentation0.nii.gz" \
+-b 2.0 -o "ants_fusion_label_output.nii" -s 3x3x3 -t ['im1.nii', 'im2.nii']"
 
     >>> antsjointfusion.inputs.atlas_image = [ ['rc1s1.nii','rc1s2.nii'],
     ...                                        ['rc2s1.nii','rc2s2.nii'] ]
@@ -972,7 +972,7 @@ class AntsJointFusion(ANTSCommand):
     ...                                                    'segmentation1.nii.gz']
     >>> antsjointfusion.cmdline
     "antsJointFusion -a 0.1 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 2.0 -o ants_fusion_label_output.nii \
+-l "segmentation0.nii.gz" -l "segmentation1.nii.gz" -b 2.0 -o "ants_fusion_label_output.nii" \
 -s 3x3x3 -t ['im1.nii', 'im2.nii']"
 
     >>> antsjointfusion.inputs.dimension = 3
@@ -982,7 +982,7 @@ class AntsJointFusion(ANTSCommand):
     >>> antsjointfusion.inputs.search_radius = [3]
     >>> antsjointfusion.cmdline
     "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -o ants_fusion_label_output.nii \
+-l "segmentation0.nii.gz" -l "segmentation1.nii.gz" -b 1.0 -d 3 -o "ants_fusion_label_output.nii" \
 -p 3x2x1 -s 3 -t ['im1.nii', 'im2.nii']"
 
     >>> antsjointfusion.inputs.search_radius = ['mask.nii']
@@ -991,8 +991,8 @@ class AntsJointFusion(ANTSCommand):
     >>> antsjointfusion.inputs.exclusion_image_label = ['1','2']
     >>> antsjointfusion.cmdline
     "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] \
--o ants_fusion_label_output.nii -p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
+-l "segmentation0.nii.gz" -l "segmentation1.nii.gz" -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii] \
+-o "ants_fusion_label_output.nii" -p 3x2x1 -s "mask.nii" -t ['im1.nii', 'im2.nii'] -v"
 
     >>> antsjointfusion.inputs.out_label_fusion = 'ants_fusion_label_output.nii'
     >>> antsjointfusion.inputs.out_intensity_fusion_name_format = 'ants_joint_fusion_intensity_%d.nii.gz'
@@ -1000,10 +1000,10 @@ class AntsJointFusion(ANTSCommand):
     >>> antsjointfusion.inputs.out_atlas_voting_weight_name_format = 'ants_joint_fusion_voting_weight_%d.nii.gz'
     >>> antsjointfusion.cmdline
     "antsJointFusion -a 0.5 -g ['rc1s1.nii', 'rc1s2.nii'] -g ['rc2s1.nii', 'rc2s2.nii'] \
--l segmentation0.nii.gz -l segmentation1.nii.gz -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii]  \
+-l "segmentation0.nii.gz" -l "segmentation1.nii.gz" -b 1.0 -d 3 -e 1[roi01.nii] -e 2[roi02.nii]  \
 -o [ants_fusion_label_output.nii, ants_joint_fusion_intensity_%d.nii.gz, \
 ants_joint_fusion_posterior_%d.nii.gz, ants_joint_fusion_voting_weight_%d.nii.gz] \
--p 3x2x1 -s mask.nii -t ['im1.nii', 'im2.nii'] -v"
+-p 3x2x1 -s "mask.nii" -t ['im1.nii', 'im2.nii'] -v"
 
     """
     input_spec = AntsJointFusionInputSpec
